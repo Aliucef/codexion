@@ -1,6 +1,6 @@
 TARGET = codexion
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -pthread
 
 SRCS = coders/main.c coders/parser/parse.c coders/validation/validate.c
 OBJS = $(SRCS:.c=.o)

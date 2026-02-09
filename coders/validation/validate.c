@@ -6,12 +6,11 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:33:16 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/09 11:35:52 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/09 12:07:24 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-
-int ft_strcmp(char *str, char *target)
+int	ft_strcmp(char *str, char *target)
 {
 	int	i;
 
@@ -21,20 +20,20 @@ int ft_strcmp(char *str, char *target)
 	return (str[i] - target[i]);
 }
 
-int is_num(char c)
+int	is_num(char c)
 {
 	return (c >= '0' && c <= '9');
 }
 
-int valid_scheduler(char *str)
+int	valid_scheduler(char *str)
 {
 	return (ft_strcmp(str, "fifo") == 0 || ft_strcmp(str, "edf") == 0);
 }
 
-int is_valid(int argc ,char **argv)
+int	is_valid(int argc, char **argv)
 {
-	int i;
-	int j;
+	int	i;
+	int	j;
 
 	i = 1;
 	if (argc != 9)

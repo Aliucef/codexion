@@ -6,16 +6,16 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:42:11 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/09 11:54:24 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/09 12:04:59 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "parser/parse.h"
 #include "stdio.h"
 
-int main(int argc , char **argv)
+int	main(int argc, char **argv)
 {
-	t_parse args;
+	t_parse	args;
 
 	if (!is_valid(argc, argv))
 	{
