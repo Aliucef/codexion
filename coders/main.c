@@ -6,11 +6,11 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:42:11 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/09 11:42:56 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/09 11:54:24 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "src/parser/parse.h"
+#include "parser/parse.h"
 #include "stdio.h"
 
 int main(int argc , char **argv)

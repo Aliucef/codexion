@@ -2,7 +2,7 @@ TARGET = codexion
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
-SRCS = main.c src/parser/parse.c src/validation/validate.c
+SRCS = coders/main.c coders/parser/parse.c coders/validation/validate.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
