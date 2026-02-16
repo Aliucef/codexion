@@ -1,44 +1,19 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.c                                             :+:      :+:    :+:   */
+/*   coders.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/09 11:42:11 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/16 11:53:52 by alyousse         ###   ########.fr       */
+/*   Created: 2026/02/16 13:54:27 by alyousse          #+#    #+#             */
+/*   Updated: 2026/02/16 14:00:26 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "coders.h"
 #include "parser/parse.h"
-#include "stdio.h"
 
-
-void	sim_destroy(t_sim *sim)
+void	init_coder(t_coder *coder)
 {
-	if (!sim)
-		return ;
-	pthread_mutex_destroy(&sim->log_m);
-	pthread_mutex_destroy(&sim->stop_m);
-}
-
-int	main(int argc, char **argv)
-{
-	t_parse	args;
-	t_sim sim;
-
-	if (!is_valid(argc, argv))
-	{
-		printf("fail parameters\n");
-		return (0);
-	}
-	init_arguments(&args, argv);
-
-	if (!init_sim(&sim, &args))
-	{
-		printf("init failed\n");
-		return (1);
-	}
-	sim_destroy(&sim);
-
+	
 }

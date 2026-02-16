@@ -6,9 +6,11 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:33:16 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/16 11:08:51 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/16 11:24:27 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include "../parser/parse.h"
 
 int	ft_strcmp(char *str, char *target)
 {
@@ -25,15 +27,23 @@ int	is_num(char c)
 	return (c >= '0' && c <= '9');
 }
 
-int	valid_scheduler(char *str)
+int	parse_scheduler(const char *str, t_sched *out)
 {
-	return (ft_strcmp(str, "fifo") == 0 || ft_strcmp(str, "edf") == 0);
+	if (!str || !out)
+		return (0);
+	if (ft_strcmp((char *)str, "fifo") == 0)
+		return (*out = SCHED_FIFO, 1);
+	if (ft_strcmp((char *)str, "edf") == 0)
+		return (*out = SCHED_EDF, 1);
+	return (0);
 }
+
 
 int	is_valid(int argc, char **argv)
 {
-	int	i;
-	int	j;
+	int		i;
+	int		j;
+	t_sched	tmp;
 
 	i = 1;
 	if (argc != 9)
@@ -49,7 +59,7 @@ int	is_valid(int argc, char **argv)
 		}
 		i++;
 	}
-	if (!valid_scheduler(argv[i]))
+	if (!parse_scheduler(argv[8], &tmp))
 		return (0);
 	return (1);
 }
