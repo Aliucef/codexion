@@ -17,18 +17,46 @@
 #include "stop/stop.h"
 
 
+#include <unistd.h> // usleep
+
+static int	get_compile_count(t_coder *c)
+{
+	int v;
+
+	pthread_mutex_lock(&c->m);
+	v = c->compile_count;
+	pthread_mutex_unlock(&c->m);
+	return v;
+}
+
 void	*coder_routine(void *arg)
 {
-	t_coder	*c = (t_coder *)arg;
+	t_coder	*c;
+	long	now;
 
-	while (!sim_should_stop(c->sim))
+	c = (t_coder *)arg;
+	while (!sim_should_stop(c->sim) &&
+		   get_compile_count(c) < c->sim->config.required_compiles)
 	{
-		log_state(c->sim, c->id, "is alive");
-		usleep(200 * 1000); // 200ms, just for testing
+		// mark compile start (for burnout monitor later)
+		now = get_time_ms();
+		pthread_mutex_lock(&c->m);
+		c->last_compile_start_ms = now;
+		pthread_mutex_unlock(&c->m);
+
+		log_state(c->sim, c->id, "is compiling");
+		usleep(c->sim->config.time_to_compile * 1000);
+
+		// increment compile count
+		pthread_mutex_lock(&c->m);
+		c->compile_count++;
+		pthread_mutex_unlock(&c->m);
 	}
+
 	log_state(c->sim, c->id, "exiting");
 	return (NULL);
 }
+
 
 void	*monitor_routine(void *arg)
 {
