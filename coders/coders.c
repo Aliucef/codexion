@@ -51,23 +51,69 @@ void	*coder_routine(void *arg)
 		pthread_mutex_lock(&c->m);
 		c->compile_count++;
 		pthread_mutex_unlock(&c->m);
-	}
+        log_state(c->sim, c->id, "is debugging");
+        usleep(c->sim->config.time_to_debug * 1000);
+        log_state(c->sim, c->id, "is refactoring");
+        usleep(c->sim->config.time_to_refactor * 1000);
+    }
 
 	log_state(c->sim, c->id, "exiting");
 	return (NULL);
 }
 
 
+static int	all_done(t_sim *sim)
+{
+	int i;
+
+	i = 0;
+	while (i < sim->config.nb_of_coders)
+	{
+		pthread_mutex_lock(&sim->coders[i].m);
+		if (sim->coders[i].compile_count < sim->config.required_compiles)
+		{
+			pthread_mutex_unlock(&sim->coders[i].m);
+			return (0);
+		}
+		pthread_mutex_unlock(&sim->coders[i].m);
+		i++;
+	}
+	return (1);
+}
+
 void	*monitor_routine(void *arg)
 {
-	t_sim	*sim = (t_sim *)arg;
-	long	start = get_time_ms();
+	t_sim	*sim;
+	long	now;
+	long	last_start;
+	int		i;
 
-	while (get_time_ms() - start < 2000)
-		usleep(50 * 1000);
+	sim = (t_sim *)arg;
+	while (!sim_should_stop(sim))
+	{
+		now = get_time_ms();
 
-	sim_set_stop(sim);
-
-	// wake sleepers later when we have condvar waits (not needed yet)
+		// Burnout detection (must log within 10ms)
+		i = 0;
+		while (i < sim->config.nb_of_coders)
+		{
+			pthread_mutex_lock(&sim->coders[i].m);
+			last_start = sim->coders[i].last_compile_start_ms;
+			pthread_mutex_unlock(&sim->coders[i].m);
+			if (now - last_start > sim->config.time_to_burnout)
+			{
+				log_state(sim, sim->coders[i].id, "burned out"); // :contentReference[oaicite:8]{index=8}
+				sim_set_stop(sim);
+				return (NULL);
+			}
+			i++;
+		}
+		if (all_done(sim))
+		{
+			sim_set_stop(sim);
+			return (NULL);
+		}
+		usleep(1000);
+	}
 	return (NULL);
 }
