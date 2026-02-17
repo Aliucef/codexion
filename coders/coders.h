@@ -36,6 +36,8 @@ typedef struct s_dongle
 	long			cooldown_until_ms;
 }	t_dongle;
 
+void	*coder_routine(void *arg);
+void	*monitor_routine(void *arg);
 
 
 #endif

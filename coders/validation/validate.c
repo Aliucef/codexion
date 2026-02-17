@@ -32,9 +32,9 @@ int	parse_scheduler(const char *str, t_sched *out)
 	if (!str || !out)
 		return (0);
 	if (ft_strcmp((char *)str, "fifo") == 0)
-		return (*out = SCHED_FIFO, 1);
+		return (*out = SCED_FIFO, 1);
 	if (ft_strcmp((char *)str, "edf") == 0)
-		return (*out = SCHED_EDF, 1);
+		return (*out = SCED_EDF, 1);
 	return (0);
 }
 

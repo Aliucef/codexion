@@ -15,7 +15,7 @@
 
 # include "../validation/validate.h"
 # include <pthread.h>
-# include "coders.h"
+# include "../coders.h"
 
 
 typedef struct s_parse
@@ -47,5 +47,6 @@ typedef struct s_sim
 
 void	init_arguments(t_parse *args, char **argv);
 int		init_sim(t_sim *sim, const t_parse *config);
+long	get_time_ms(void);
 
 #endif

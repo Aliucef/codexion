@@ -17,8 +17,8 @@
 
 typedef enum e_sched
 {
-	SCHED_FIFO,
-	SCHED_EDF
+	SCED_FIFO,
+	SCED_EDF
 }	t_sched;
 
 
