@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:33:16 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/16 11:24:27 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/18 13:08:48 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,6 @@ int	parse_scheduler(const char *str, t_sched *out)
 		return (*out = SCED_EDF, 1);
 	return (0);
 }
-
 
 int	is_valid(int argc, char **argv)
 {
