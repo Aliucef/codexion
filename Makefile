@@ -1,15 +1,28 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2026/02/18 13:25:33 by alyousse          #+#    #+#              #
+#    Updated: 2026/02/18 13:25:33 by alyousse         ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
 TARGET = codexion
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread
 DIR = coders
 SRCS = $(DIR)/main.c \
-	   $(DIR)/coders.c \
-	   $(DIR)/parser/parse.c \
-	   $(DIR)/validation/validate.c \
-	   $(DIR)/stop/stop.c \
-	   $(DIR)/logs/log.c
-	   
-	
+		$(DIR)/coders.c \
+		$(DIR)/parser/parse.c \
+		$(DIR)/validation/validate.c \
+		$(DIR)/stop/stop.c \
+		$(DIR)/logs/log.c \
+		$(DIR)/dongles/dongles.c \
+		$(DIR)/parser/init_simulator.c
+
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)

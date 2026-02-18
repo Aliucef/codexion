@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 09:30:13 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/16 15:03:00 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/18 13:08:03 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,6 @@
 # include "../validation/validate.h"
 # include <pthread.h>
 # include "../coders.h"
-
 
 typedef struct s_parse
 {
@@ -41,9 +40,6 @@ typedef struct s_sim
 	t_dongle		*dongles;
 
 }	t_sim;
-
-
-
 
 void	init_arguments(t_parse *args, char **argv);
 int		init_sim(t_sim *sim, const t_parse *config);
