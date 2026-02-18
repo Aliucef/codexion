@@ -3,13 +3,13 @@ CC = cc
 CFLAGS = -Wall -Wextra -Werror -pthread
 DIR = coders
 SRCS = $(DIR)/main.c \
-	   $(DIR)/coders.c \
-	   $(DIR)/parser/parse.c \
-	   $(DIR)/validation/validate.c \
-	   $(DIR)/stop/stop.c \
-	   $(DIR)/logs/log.c
-	   
-	
+		$(DIR)/coders.c \
+		$(DIR)/parser/parse.c \
+		$(DIR)/validation/validate.c \
+		$(DIR)/stop/stop.c \
+		$(DIR)/logs/log.c \
+		$(DIR)/dongles/dongles.c \
+
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)

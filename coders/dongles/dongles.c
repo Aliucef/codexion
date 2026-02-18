@@ -6,13 +6,26 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 09:20:58 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/18 10:00:46 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/18 12:01:36 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../parser/parse.h"
 #include <pthread.h>
 #include "../stop/stop.h"
+#include "../logs/log.h"
+
+
+static struct timespec	ms_to_abs_timespec(long ms_abs)
+{
+	struct timespec	ts;
+
+	ts.tv_sec = ms_abs / 1000;
+	ts.tv_nsec = (ms_abs % 1000) * 1000000L;
+	return (ts);
+}
+
+
 
 int	dongle_take(t_sim *sim, int dongle_idx, int coder_id)
 {
@@ -21,12 +34,18 @@ int	dongle_take(t_sim *sim, int dongle_idx, int coder_id)
 
 	dongle = &sim->dongles[dongle_idx]; // pick each dongle from the dongle array
 	pthread_mutex_lock(&dongle->mutex);
-	while (!sim_should_stop(&dongle->mutex))
+	while (!sim_should_stop(sim))
 	{
 		now = get_time_ms();
 		if (!dongle->held && now >= dongle->cooldown_until_ms) // if dongle is not held and now is still larger than cooldown means the dongle is available
 			break;
-		pthread_cond_wait(&dongle->condvar, &dongle->mutex); // this works like semaphore . once held , no thread can continue with this dongle ,
+		if (!dongle->held && now < dongle->cooldown_until_ms)
+		{
+			struct timespec deadline = ms_to_abs_timespec(dongle->cooldown_until_ms);
+			pthread_cond_timedwait(&dongle->condvar, &dongle->mutex, &deadline);
+		}
+		else
+			pthread_cond_wait(&dongle->condvar, &dongle->mutex);
 	}
 	if (sim_should_stop(sim))
 	{

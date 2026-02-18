@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/16 13:40:03 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/16 17:01:03 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/02/18 11:27:58 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,16 @@ typedef struct coders
 	struct s_sim		*sim; // back-pointer to access whatever data inside it
 
 }	t_coder;
+
+
+// typedef struct coders_dongle
+// {
+// 	int	left;
+// 	int	right;
+// 	int	first;
+// };
+
+
 
 
 typedef struct s_dongle
