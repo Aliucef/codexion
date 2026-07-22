@@ -24,7 +24,7 @@ static int	sim_init_cleanup(t_sim *sim, int coders_inited, int dongles_inited)
 	k = 0;
 	while (k < dongles_inited)
 	{
-		pthread_cond_destroy(&sim->dongles[k].condvar);
+		free(sim->dongles[k].queue);
 		pthread_mutex_destroy(&sim->dongles[k].mutex);
 		k++;
 	}
@@ -32,7 +32,10 @@ static int	sim_init_cleanup(t_sim *sim, int coders_inited, int dongles_inited)
 	sim->dongles = NULL;
 	k = -1;
 	while (++k < coders_inited)
+	{
+		pthread_cond_destroy(&sim->coders[k].wait_cond);
 		pthread_mutex_destroy(&sim->coders[k].m);
+	}
 	free(sim->coders);
 	sim->coders = NULL;
 	pthread_mutex_destroy(&sim->log_m);
@@ -59,6 +62,8 @@ static int	init_coders(t_sim *sim, int *out_inited)
 		c->last_compile_start_ms = sim->start_ms;
 		if (pthread_mutex_init(&c->m, NULL) != 0)
 			return (0);
+		if (pthread_cond_init(&c->wait_cond, NULL) != 0)
+			return (pthread_mutex_destroy(&c->m), 0);
 		(*out_inited)++;
 		i++;
 	}
@@ -79,12 +84,12 @@ static int	init_dongles(t_sim *sim, int *out_inited)
 	{
 		d = &sim->dongles[i];
 		memset(d, 0, sizeof(*d));
-		d->held = 0;
 		d->cooldown_until_ms = sim->start_ms;
-		if (pthread_mutex_init(&d->mutex, NULL) != 0)
+		d->queue = malloc(sizeof(t_waiter) * sim->config.nb_of_coders);
+		if (!d->queue)
 			return (0);
-		if (pthread_cond_init(&d->condvar, NULL) != 0)
-			return (pthread_mutex_destroy(&d->mutex), 0);
+		if (pthread_mutex_init(&d->mutex, NULL) != 0)
+			return (free(d->queue), d->queue = NULL, 0);
 		(*out_inited)++;
 	}
 	return (1);

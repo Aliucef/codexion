@@ -15,11 +15,28 @@
 #include "coders.h"
 #include "stop/stop.h"
 #include "logs/log.h"
+#include <stdlib.h>
 
 void	sim_destroy(t_sim *sim)
 {
+	int	i;
+
 	if (!sim)
 		return ;
+	i = -1;
+	while (++i < sim->config.nb_of_coders)
+	{
+		pthread_cond_destroy(&sim->coders[i].wait_cond);
+		pthread_mutex_destroy(&sim->coders[i].m);
+	}
+	free(sim->coders);
+	i = -1;
+	while (++i < sim->config.nb_of_coders)
+	{
+		free(sim->dongles[i].queue);
+		pthread_mutex_destroy(&sim->dongles[i].mutex);
+	}
+	free(sim->dongles);
 	pthread_mutex_destroy(&sim->log_m);
 	pthread_mutex_destroy(&sim->stop_m);
 }

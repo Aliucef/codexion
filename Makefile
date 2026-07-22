@@ -16,11 +16,14 @@ CFLAGS = -Wall -Wextra -Werror -pthread
 DIR = coders
 SRCS = $(DIR)/main.c \
 		$(DIR)/coders.c \
+		$(DIR)/monitor.c \
 		$(DIR)/parser/parse.c \
 		$(DIR)/validation/validate.c \
 		$(DIR)/stop/stop.c \
 		$(DIR)/logs/log.c \
 		$(DIR)/dongles/dongles.c \
+		$(DIR)/dongles/pqueue.c \
+		$(DIR)/dongles/pqueue2.c \
 		$(DIR)/parser/init_simulator.c
 
 OBJS = $(SRCS:.c=.o)

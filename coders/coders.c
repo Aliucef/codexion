@@ -34,96 +34,58 @@ void	sim_wake_all(t_sim *sim)
 
 	i = -1;
 	while (++i < sim->config.nb_of_coders)
-	{
-		pthread_mutex_lock(&sim->dongles[i].mutex);
-		pthread_cond_broadcast(&sim->dongles[i].condvar);
-		pthread_mutex_unlock(&sim->dongles[i].mutex);
-	}
+		pthread_cond_signal(&sim->coders[i].wait_cond);
+}
+
+static void	coder_do_cycle(t_coder *coder, int first, int second)
+{
+	long	now;
+
+	if (!dongle_take(coder->sim, first, coder->id))
+		return ;
+	if (second != first && !dongle_take(coder->sim, second, coder->id))
+		return (dongle_release(coder->sim, first), (void)0);
+	now = get_time_ms();
+	pthread_mutex_lock(&coder->m);
+	coder->last_compile_start_ms = now;
+	pthread_mutex_unlock(&coder->m);
+	log_state(coder->sim, coder->id, "is compiling");
+	usleep(coder->sim->config.time_to_compile * 1000);
+	dongle_release(coder->sim, first);
+	if (second != first)
+		dongle_release(coder->sim, second);
+	pthread_mutex_lock(&coder->m);
+	coder->compile_count++;
+	pthread_mutex_unlock(&coder->m);
+	log_state(coder->sim, coder->id, "is debugging");
+	usleep(coder->sim->config.time_to_debug * 1000);
+	log_state(coder->sim, coder->id, "is refactoring");
+	usleep(coder->sim->config.time_to_refactor * 1000);
 }
 
 void	*coder_routine(void *arg)
 {
 	t_coder	*coder;
-	long	now;
+	int		n;
+	int		first;
+	int		second;
 
 	coder = (t_coder *)arg;
-	int	n = coder->sim->config.nb_of_coders;
-	int	left = coder->id - 1;
-	int	right = coder->id % n;
-	int	first = (left < right) ? left : right;
-	int	second = (left < right) ? right : left;
-
-	while (!sim_should_stop(coder->sim) &&
-			get_compile_count(coder) < coder->sim->config.required_compiles)
+	n = coder->sim->config.nb_of_coders;
+	if (coder->id - 1 < coder->id % n)
 	{
-		if (!dongle_take(coder->sim, first, coder->id))
-			break ;
-		if (!dongle_take(coder->sim, second, coder->id))
-		{
-			dongle_release(coder->sim, first);
-			break ;
-		}
-		now = get_time_ms();
-		pthread_mutex_lock(&coder->m);
-		coder->last_compile_start_ms = now;
-		pthread_mutex_unlock(&coder->m);
-		log_state(coder->sim, coder->id, "is compiling");
-		usleep(coder->sim->config.time_to_compile * 1000);
-		dongle_release(coder->sim, first);
-		dongle_release(coder->sim, second);
-		pthread_mutex_lock(&coder->m);
-		coder->compile_count++;
-		pthread_mutex_unlock(&coder->m);
-		log_state(coder->sim, coder->id, "is debugging");
-		usleep(coder->sim->config.time_to_debug * 1000);
-		log_state(coder->sim, coder->id, "is refactoring");
-		usleep(coder->sim->config.time_to_refactor * 1000);
+		first = coder->id - 1;
+		second = coder->id % n;
 	}
-	log_state(coder->sim, coder->id, "exiting");
-	return (NULL);
-}
-
-static int	all_done(t_sim *sim)
-{
-	int	i;
-
-	i = -1;
-	while (++i < sim->config.nb_of_coders)
+	else
 	{
-		pthread_mutex_lock(&sim->coders[i].m);
-		if (sim->coders[i].compile_count < sim->config.required_compiles)
-			return (pthread_mutex_unlock(&sim->coders[i].m), 0);
-		pthread_mutex_unlock(&sim->coders[i].m);
+		first = coder->id % n;
+		second = coder->id - 1;
 	}
-	return (1);
-}
-
-void	*monitor_routine(void *arg)
-{
-	t_sim	*sim;
-	long	now;
-	long	last_start;
-	int		i;
-
-	sim = (t_sim *)arg;
-	while (!sim_should_stop(sim))
-	{
-		now = get_time_ms();
-		i = -1;
-		while (++i < sim->config.nb_of_coders)
-		{
-			pthread_mutex_lock(&sim->coders[i].m);
-			last_start = sim->coders[i].last_compile_start_ms;
-			pthread_mutex_unlock(&sim->coders[i].m);
-			if (now - last_start > sim->config.time_to_burnout)
-			{
-				log_state(sim, sim->coders[i].id, "burned out");
-				return (sim_set_stop(sim), sim_wake_all(sim), NULL);
-			}
-		}
-		if (all_done(sim))
-			return (sim_set_stop(sim), sim_wake_all(sim), NULL);
-		usleep(1000);
-	}
+	if (n == 1)
+		second = first;
+	while (!sim_should_stop(coder->sim)
+		&& get_compile_count(coder) < coder->sim->config.required_compiles)
+		coder_do_cycle(coder, first, second);
 	return (NULL);
 }

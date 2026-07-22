@@ -6,61 +6,94 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 09:20:58 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/18 13:21:40 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/07/22 00:00:00 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../parser/parse.h"
-#include <pthread.h>
 #include "../stop/stop.h"
 #include "../logs/log.h"
+#include "pqueue.h"
+#include <time.h>
 
-static struct timespec	ms_to_abs_timespec(long ms_abs)
+static long	get_priority(t_sim *sim, int coder_id)
+{
+	long	deadline;
+
+	if (sim->config.scheduler == SCED_EDF)
+	{
+		pthread_mutex_lock(&sim->coders[coder_id - 1].m);
+		deadline = sim->coders[coder_id - 1].last_compile_start_ms
+			+ sim->config.time_to_burnout;
+		pthread_mutex_unlock(&sim->coders[coder_id - 1].m);
+		return (deadline);
+	}
+	return (get_time_ms());
+}
+
+static void	coder_wait(t_sim *sim, t_dongle *d, int coder_id)
 {
 	struct timespec	ts;
+	pthread_cond_t	*cond;
 
-	ts.tv_sec = ms_abs / 1000;
-	ts.tv_nsec = (ms_abs % 1000) * 1000000L;
-	return (ts);
+	cond = &sim->coders[coder_id - 1].wait_cond;
+	if (pq_peek(d) == coder_id && !d->held)
+	{
+		ts.tv_sec = d->cooldown_until_ms / 1000;
+		ts.tv_nsec = (d->cooldown_until_ms % 1000) * 1000000L;
+		pthread_cond_timedwait(cond, &d->mutex, &ts);
+	}
+	else
+		pthread_cond_wait(cond, &d->mutex);
+}
+
+static int	dongle_wait_loop(t_sim *sim, t_dongle *d, int coder_id)
+{
+	long	now;
+
+	while (!sim_should_stop(sim))
+	{
+		now = get_time_ms();
+		if (pq_peek(d) == coder_id && !d->held && now >= d->cooldown_until_ms)
+			return (1);
+		coder_wait(sim, d, coder_id);
+	}
+	return (0);
 }
 
 int	dongle_take(t_sim *sim, int dongle_idx, int coder_id)
 {
-	t_dongle		*dongle;
-	long			now;
-	struct timespec	deadline;
+	t_dongle	*d;
+	long		priority;
 
-	dongle = &sim->dongles[dongle_idx];
-	pthread_mutex_lock(&dongle->mutex);
-	while (!sim_should_stop(sim))
+	d = &sim->dongles[dongle_idx];
+	priority = get_priority(sim, coder_id);
+	pthread_mutex_lock(&d->mutex);
+	pq_push(d, coder_id, priority);
+	if (!dongle_wait_loop(sim, d, coder_id))
 	{
-		now = get_time_ms();
-		if (!dongle->held && now >= dongle->cooldown_until_ms)
-			break ;
-		if (!dongle->held && now < dongle->cooldown_until_ms)
-		{
-			deadline = ms_to_abs_timespec(dongle->cooldown_until_ms);
-			pthread_cond_timedwait(&dongle->condvar, &dongle->mutex, &deadline);
-		}
-		else
-			pthread_cond_wait(&dongle->condvar, &dongle->mutex);
+		pq_remove(d, coder_id);
+		pthread_mutex_unlock(&d->mutex);
+		return (0);
 	}
-	if (sim_should_stop(sim))
-		return (pthread_mutex_unlock(&dongle->mutex), 0);
-	dongle->held = 1;
-	pthread_mutex_unlock(&dongle->mutex);
+	pq_pop(d);
+	d->held = 1;
+	pthread_mutex_unlock(&d->mutex);
 	log_state(sim, coder_id, "has taken a dongle");
 	return (1);
 }
 
 void	dongle_release(t_sim *sim, int dongle_idx)
 {
-	t_dongle	*dongle;
+	t_dongle	*d;
+	int			next_id;
 
-	dongle = &sim->dongles[dongle_idx];
-	pthread_mutex_lock(&dongle->mutex);
-	dongle->held = 0;
-	dongle->cooldown_until_ms = get_time_ms() + sim->config.dongle_cooldown;
-	pthread_cond_broadcast(&dongle->condvar);
-	pthread_mutex_unlock(&dongle->mutex);
+	d = &sim->dongles[dongle_idx];
+	pthread_mutex_lock(&d->mutex);
+	d->held = 0;
+	d->cooldown_until_ms = get_time_ms() + sim->config.dongle_cooldown;
+	next_id = pq_peek(d);
+	if (next_id != -1)
+		pthread_cond_signal(&sim->coders[next_id - 1].wait_cond);
+	pthread_mutex_unlock(&d->mutex);
 }
