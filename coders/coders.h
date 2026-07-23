@@ -44,6 +44,7 @@ typedef struct s_dongle
 	int				queue_size;
 }	t_dongle;
 
+void	ft_usleep(t_sim *sim, long ms);
 void	sim_wake_all(t_sim *sim);
 void	*coder_routine(void *arg);
 void	*monitor_routine(void *arg);

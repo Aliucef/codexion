@@ -62,7 +62,7 @@ void	*monitor_routine(void *arg)
 			return (sim_set_stop(sim), sim_wake_all(sim), NULL);
 		if (all_done(sim))
 			return (sim_set_stop(sim), sim_wake_all(sim), NULL);
-		usleep(1000);
+		ft_usleep(sim, 1);
 	}
 	return (NULL);
 }
