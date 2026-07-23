@@ -43,7 +43,7 @@ static void	coder_do_cycle(t_coder *coder, int first, int second)
 
 	if (!dongle_take(coder->sim, first, coder->id))
 		return ;
-	if (second != first && !dongle_take(coder->sim, second, coder->id))
+	if (second == first || !dongle_take(coder->sim, second, coder->id))
 		return (dongle_release(coder->sim, first), (void)0);
 	now = get_time_ms();
 	pthread_mutex_lock(&coder->m);
@@ -82,8 +82,6 @@ void	*coder_routine(void *arg)
 		first = coder->id % n;
 		second = coder->id - 1;
 	}
-	if (n == 1)
-		second = first;
 	while (!sim_should_stop(coder->sim)
 		&& get_compile_count(coder) < coder->sim->config.required_compiles)
 		coder_do_cycle(coder, first, second);
