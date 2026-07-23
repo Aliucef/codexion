@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:33:16 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/18 13:08:48 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/07/22 16:09:02 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,20 +45,20 @@ int	is_valid(int argc, char **argv)
 	t_sched	tmp;
 
 	i = 1;
-	if (argc != 9)
-		return (0);
-	while (i < 8)
+	if (argc != 9) // any number of args that is not 9 is rejected , including ./name
+		return (0); // false
+	while (i < 8) // iterating from 1 to 7 (parsing numerical arguments)
 	{
 		j = 0;
 		while (argv[i][j])
 		{
-			if (!is_num(argv[i][j]))
+			if (!is_num(argv[i][j])) // if not number quit
 				return (0);
 			j++;
 		}
 		i++;
 	}
-	if (!parse_scheduler(argv[8], &tmp))
+	if (!parse_scheduler(argv[8], &tmp)) //check scheduler
 		return (0);
 	return (1);
 }

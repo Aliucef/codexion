@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/18 09:20:58 by alyousse          #+#    #+#             */
-/*   Updated: 2026/07/22 00:00:00 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/07/23 11:27:12 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ static long	get_priority(t_sim *sim, int coder_id)
 {
 	long	deadline;
 
-	if (sim->config.scheduler == SCED_EDF)
+	if (sim->config.scheduler == SCED_EDF) // if usin edf
 	{
 		pthread_mutex_lock(&sim->coders[coder_id - 1].m);
 		deadline = sim->coders[coder_id - 1].last_compile_start_ms
@@ -28,7 +28,7 @@ static long	get_priority(t_sim *sim, int coder_id)
 		pthread_mutex_unlock(&sim->coders[coder_id - 1].m);
 		return (deadline);
 	}
-	return (get_time_ms());
+	return (get_time_ms()); // just uses fifo
 }
 
 static void	coder_wait(t_sim *sim, t_dongle *d, int coder_id)
@@ -66,10 +66,10 @@ int	dongle_take(t_sim *sim, int dongle_idx, int coder_id)
 	t_dongle	*d;
 	long		priority;
 
-	d = &sim->dongles[dongle_idx];
-	priority = get_priority(sim, coder_id);
-	pthread_mutex_lock(&d->mutex);
-	pq_push(d, coder_id, priority);
+	d = &sim->dongles[dongle_idx]; // assign each dongle separately
+	priority = get_priority(sim, coder_id); // check which algorithm in use
+	pthread_mutex_lock(&d->mutex); //lock the dongle
+	pq_push(d, coder_id, priority); // queue
 	if (!dongle_wait_loop(sim, d, coder_id))
 	{
 		pq_remove(d, coder_id);
@@ -89,11 +89,11 @@ void	dongle_release(t_sim *sim, int dongle_idx)
 	int			next_id;
 
 	d = &sim->dongles[dongle_idx];
-	pthread_mutex_lock(&d->mutex);
-	d->held = 0;
-	d->cooldown_until_ms = get_time_ms() + sim->config.dongle_cooldown;
-	next_id = pq_peek(d);
-	if (next_id != -1)
-		pthread_cond_signal(&sim->coders[next_id - 1].wait_cond);
-	pthread_mutex_unlock(&d->mutex);
+	pthread_mutex_lock(&d->mutex); // lock dongle
+	d->held = 0; // set held to 0 , means its not held
+	d->cooldown_until_ms = get_time_ms() + sim->config.dongle_cooldown; // cooldown for the dungle, - now + fresh cooldown
+	next_id = pq_peek(d); // check in the queue
+	if (next_id != -1) // queue is empty
+		pthread_cond_signal(&sim->coders[next_id - 1].wait_cond); //signal
+	pthread_mutex_unlock(&d->mutex); //unlock
 }

@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/22 00:00:00 by alyousse          #+#    #+#             */
-/*   Updated: 2026/07/22 00:00:00 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/07/23 11:33:22 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,11 +56,11 @@ void	*monitor_routine(void *arg)
 	t_sim	*sim;
 
 	sim = (t_sim *)arg;
-	while (!sim_should_stop(sim))
+	while (!sim_should_stop(sim)) // as long as it shouldnt stop
 	{
-		if (check_burnout(sim, get_time_ms()))
+		if (check_burnout(sim, get_time_ms())) //
 			return (sim_set_stop(sim), sim_wake_all(sim), NULL);
-		if (all_done(sim))
+		if (all_done(sim)) // check if all done
 			return (sim_set_stop(sim), sim_wake_all(sim), NULL);
 		usleep(1000);
 	}

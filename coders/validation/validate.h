@@ -6,7 +6,7 @@
 /*   By: alyousse <alyousse@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/02/09 11:35:56 by alyousse          #+#    #+#             */
-/*   Updated: 2026/02/18 13:11:38 by alyousse         ###   ########.fr       */
+/*   Updated: 2026/07/23 08:30:20 by alyousse         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 
 # include "../parser/parse.h"
 
-typedef enum e_sched
+typedef enum e_sched // enum struct of the 2 expected algorithms
 {
 	SCED_FIFO,
 	SCED_EDF
