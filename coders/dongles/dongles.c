@@ -35,16 +35,16 @@ static void	coder_wait(t_sim *sim, t_dongle *d, int coder_id)
 {
 	struct timespec	ts;
 	pthread_cond_t	*cond;
+	long			deadline;
 
 	cond = &sim->coders[coder_id - 1].wait_cond;
 	if (pq_peek(d) == coder_id && !d->held)
-	{
-		ts.tv_sec = d->cooldown_until_ms / 1000;
-		ts.tv_nsec = (d->cooldown_until_ms % 1000) * 1000000L;
-		pthread_cond_timedwait(cond, &d->mutex, &ts);
-	}
+		deadline = d->cooldown_until_ms;
 	else
-		pthread_cond_wait(cond, &d->mutex);
+		deadline = get_time_ms() + 1;
+	ts.tv_sec = deadline / 1000;
+	ts.tv_nsec = (deadline % 1000) * 1000000L;
+	pthread_cond_timedwait(cond, &d->mutex, &ts);
 }
 
 static int	dongle_wait_loop(t_sim *sim, t_dongle *d, int coder_id)

@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include "../parser/parse.h"
+#include "../stop/stop.h"
 
 void	log_state(t_sim *sim, int coder_id, const char *message)
 {
@@ -23,6 +24,7 @@ void	log_state(t_sim *sim, int coder_id, const char *message)
 	now = get_time_ms();
 	timestamp = now - sim->start_ms;
 	pthread_mutex_lock(&sim->log_m);
-	printf("%ld %d %s\n", timestamp, coder_id, message);
+	if (!sim_should_stop(sim))
+		printf("%ld %d %s\n", timestamp, coder_id, message);
 	pthread_mutex_unlock(&sim->log_m);
 }

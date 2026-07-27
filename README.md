@@ -61,7 +61,7 @@ make re      # full rebuild
 
 **Burnout detection:** A dedicated monitor thread polls every 1 ms, comparing `now - last_compile_start_ms` against `time_to_burnout` for each coder. The burnout message is printed within 10 ms of actual burnout time. On detecting burnout (or simulation completion), the monitor signals all waiting coders to unblock and exit cleanly.
 
-**Single-coder edge case:** With one coder, both left and right dongle indices resolve to 0. A special case skips the second `dongle_take`, avoiding a self-deadlock where the coder would wait forever for a dongle it already holds.
+**Single-coder edge case:** With one coder, both left and right dongle indices resolve to 0. Since a coder must hold two **distinct** dongles to compile but only one exists, it can never compile. The coder keeps picking up and dropping the single dongle without ever making progress, until the monitor detects it has not compiled within `time_to_burnout` and terminates the simulation.
 
 ## Thread Synchronization Mechanisms
 

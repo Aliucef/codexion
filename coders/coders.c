@@ -50,10 +50,18 @@ static int	get_compile_count(t_coder *c)
 void	sim_wake_all(t_sim *sim)
 {
 	int	i;
+	int	n;
 
+	n = sim->config.nb_of_coders;
 	i = -1;
-	while (++i < sim->config.nb_of_coders)
+	while (++i < n)
+		pthread_mutex_lock(&sim->dongles[i].mutex);
+	i = -1;
+	while (++i < n)
 		pthread_cond_signal(&sim->coders[i].wait_cond);
+	i = -1;
+	while (++i < n)
+		pthread_mutex_unlock(&sim->dongles[i].mutex);
 }
 
 static void	coder_do_cycle(t_coder *coder, int first, int second)
