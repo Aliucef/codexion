@@ -4,8 +4,6 @@
 
 Codexion is a concurrency simulation inspired by the classic Dining Philosophers problem. Multiple coders compete for shared USB dongles to compile quantum code. Each coder must hold two adjacent dongles simultaneously to compile, then releases them to debug and refactor before trying again. The goal is to keep all coders compiling without anyone burning out from resource starvation.
 
-The program demonstrates POSIX thread synchronization using mutexes, condition variables, and a custom priority queue implementing two scheduling policies: FIFO and EDF (Earliest Deadline First).
-
 ## Instructions
 
 **Build:**
@@ -49,7 +47,7 @@ make re      # full rebuild
 - [Dining Philosophers Problem — Wikipedia](https://en.wikipedia.org/wiki/Dining_philosophers_problem)
 - [Earliest Deadline First Scheduling — Wikipedia](https://en.wikipedia.org/wiki/Earliest_deadline_first_scheduling)
 
-**AI usage:** Claude Code was used to identify missing scheduler implementation, design the priority queue architecture, review norm compliance, and suggest the per-coder condvar signaling pattern. All generated code was reviewed, understood, and integrated manually.
+**AI usage:** Claude Code was used to analyse and suggest a better approach, review norm compliance. All generated code was reviewed, understood, and integrated manually.
 
 ## Blocking Cases Handled
 
